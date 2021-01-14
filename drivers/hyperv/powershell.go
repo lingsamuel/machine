@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os/exec"
 	"strings"
+	"time"
 
 	"fmt"
 
@@ -32,8 +33,10 @@ func cmdOut(args ...string) (string, error) {
 	var stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
+	start := time.Now()
 	err := cmd.Run()
-	log.Debugf("[stdout =====>] : %s", stdout.String())
+	elapsed := time.Since(start)
+	log.Debugf("[stdout =====>] : (%s) %s", elapsed, stdout.String())
 	log.Debugf("[stderr =====>] : %s", stderr.String())
 	return stdout.String(), err
 }

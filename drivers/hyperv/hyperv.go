@@ -431,6 +431,10 @@ func (d *Driver) Kill() error {
 }
 
 func (d *Driver) GetIP() (string, error) {
+	if d.IPAddress != "" {
+		log.Debugf("Getting cached IP : %s", d.IPAddress)
+		return d.IPAddress, nil
+	}
 	s, err := d.GetState()
 	if err != nil {
 		return "", err
@@ -439,6 +443,7 @@ func (d *Driver) GetIP() (string, error) {
 		return "", drivers.ErrHostIsNotRunning
 	}
 
+	log.Debugf("Retrieve IP : %s", d.IPAddress)
 	stdout, err := cmdOut("((", "Hyper-V\\Get-VM", d.MachineName, ").networkadapters[0]).ipaddresses[0]")
 	if err != nil {
 		return "", err
@@ -448,8 +453,8 @@ func (d *Driver) GetIP() (string, error) {
 	if len(resp) < 1 {
 		return "", fmt.Errorf("IP not found")
 	}
-
-	return resp[0], nil
+	d.IPAddress = resp[0]
+	return d.IPAddress, nil
 }
 
 func (d *Driver) publicSSHKeyPath() string {
